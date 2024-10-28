@@ -75,6 +75,4 @@ public class DoctorController {
                 ResponseEntity.status(HttpStatus.OK).body(pagedUsers.map(doctorMapper::mapDoctorToDoctorDTO));
     }
 
- 
-
 }
