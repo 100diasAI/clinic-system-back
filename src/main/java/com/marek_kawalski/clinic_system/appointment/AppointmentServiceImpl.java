@@ -27,15 +27,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Optional<Appointment> createUpdateAppointment(final String id, final CreateUpdateAppointmentDTO createUpdateAppointmentDTO) throws UserNotFoundException, ExaminationNotFoundException, AppointmentNotFoundException, AppointmentExistsException {
         final Optional<User> doctor = userRepository.findById(createUpdateAppointmentDTO.doctorId());
         if (doctor.isEmpty()) {
-            throw new UserNotFoundException("Doctor not found!");
+            throw new UserNotFoundException("¡Doctor no encontrado!");
         }
         Appointment appointment;
         if (id != null) {
-            appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment not found!"));
+            appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("¡Cita no encontrada!"));
             appointment.setLastUpdateDate(LocalDateTime.now());
         } else {
             if (appointmentRepository.findByDoctorAndDateAndStatus(doctor.get(), createUpdateAppointmentDTO.date(), createUpdateAppointmentDTO.status()).isPresent()) {
-                throw new AppointmentExistsException("Appointment already exists!");
+                throw new AppointmentExistsException("¡La cita ya existe!");
             }
             appointment = new Appointment();
             appointment.setCreationDate(LocalDateTime.now());
@@ -68,7 +68,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(createUpdateAppointmentDTO.status());
         appointment.setMedicines(createUpdateAppointmentDTO.medicines());
         appointment.setDoctor(doctor);
-        appointment.setPatient(userRepository.findById(createUpdateAppointmentDTO.patientId()).orElseThrow(() -> new UserNotFoundException("Patient not found!")));
-        appointment.setExamination(examinationRepository.findById(createUpdateAppointmentDTO.examinationId()).orElseThrow(() -> new ExaminationNotFoundException("Examination not found!")));
+        appointment.setPatient(userRepository.findById(createUpdateAppointmentDTO.patientId())
+            .orElseThrow(() -> new UserNotFoundException("¡Paciente no encontrado!")));
+        appointment.setExamination(examinationRepository.findById(createUpdateAppointmentDTO.examinationId())
+            .orElseThrow(() -> new ExaminationNotFoundException("¡Examen no encontrado!")));
     }
 }

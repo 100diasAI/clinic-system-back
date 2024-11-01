@@ -11,8 +11,12 @@ import com.marek_kawalski.clinic_system.user.User;
 import com.marek_kawalski.clinic_system.user.UserRepository;
 import com.marek_kawalski.clinic_system.user.UserRequestParams;
 import com.marek_kawalski.clinic_system.user.exception.UserNotFoundException;
+import com.marek_kawalski.clinic_system.user.doctor.dto.CreateDoctorDTO;
+import com.marek_kawalski.clinic_system.user.doctor.dto.UpdateDoctorDTO;
+import com.marek_kawalski.clinic_system.user.UserRole;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -27,6 +31,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class DoctorServiceImpl implements DoctorService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final ExaminationRepository examinationRepository;
     private final AppointmentRepository appointmentRepository;
 
@@ -66,6 +71,83 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public Optional<User> getDoctorByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public User createDoctor(CreateDoctorDTO createDoctorDTO) {
+        // Verificar si ya existe un usuario con ese email
+        if (userRepository.findByEmail(createDoctorDTO.email()).isPresent()) {
+            throw new IllegalStateException("Ya existe un usuario con el email: " + createDoctorDTO.email());
+        }
+
+        DoctorDetails doctorDetails = DoctorDetails.builder()
+                .specialization(createDoctorDTO.specialization())
+                .education(createDoctorDTO.education())
+                .description(createDoctorDTO.description())
+                .build();
+
+        User newDoctor = User.builder()
+                .name(createDoctorDTO.name())
+                .surname(createDoctorDTO.surname())
+                .email(createDoctorDTO.email())
+                .phoneNumber(createDoctorDTO.phoneNumber())
+                .password(passwordEncoder.encode("defaultPassword"))
+                .userRole(UserRole.ROLE_DOCTOR)
+                .isEnabled(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .doctorDetails(doctorDetails)
+                .build();
+
+        return userRepository.save(newDoctor);
+    }
+
+    @Override
+    public User updateDoctor(String doctorId, UpdateDoctorDTO updateDoctorDTO) throws UserNotFoundException {
+        User doctor = userRepository.findById(doctorId)
+                .orElseThrow(() -> new UserNotFoundException("Doctor no encontrado con ID: " + doctorId));
+
+        // Actualizar solo los campos no nulos
+        if (updateDoctorDTO.name() != null) {
+            doctor.setName(updateDoctorDTO.name());
+        }
+        if (updateDoctorDTO.surname() != null) {
+            doctor.setSurname(updateDoctorDTO.surname());
+        }
+        if (updateDoctorDTO.email() != null) {
+            doctor.setEmail(updateDoctorDTO.email());
+        }
+        if (updateDoctorDTO.phoneNumber() != null) {
+            doctor.setPhoneNumber(updateDoctorDTO.phoneNumber());
+        }
+        
+        // Actualizar detalles del doctor
+        DoctorDetails details = doctor.getDoctorDetails();
+        if (details == null) {
+            details = DoctorDetails.builder()
+                    .build();
+            doctor.setDoctorDetails(details);
+        }
+        
+        if (updateDoctorDTO.specialization() != null) {
+            details.setSpecialization(updateDoctorDTO.specialization());
+        }
+        if (updateDoctorDTO.education() != null) {
+            details.setEducation(updateDoctorDTO.education());
+        }
+        if (updateDoctorDTO.description() != null) {
+            details.setDescription(updateDoctorDTO.description());
+        }
+
+        return userRepository.save(doctor);
+    }
+
+    @Override
+    public void deleteDoctor(String doctorId) throws UserNotFoundException {
+        if (!userRepository.existsById(doctorId)) {
+            throw new UserNotFoundException("Doctor no encontrado con ID: " + doctorId);
+        }
+        userRepository.deleteById(doctorId);
     }
 
     private List<LocalDateTime> getAvailableAppointmentsSlots(final LocalDateTime startTime, final LocalDateTime endTime,

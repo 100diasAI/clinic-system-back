@@ -62,28 +62,28 @@ public class Seeder {
         ));
 
         EXAMINATION_SYMPTOMS.put("Electrocardiogram (ECG)", Arrays.asList(
-                "chest pain", "shortness of breath", "palpitations", "dizziness"
+                "dolor en el pecho", "dificultad para respirar", "palpitaciones", "mareos"
         ));
         EXAMINATION_SYMPTOMS.put("Echocardiogram", Arrays.asList(
-                "heart murmur", "chest pain", "shortness of breath", "swelling in the legs"
+                "soplo cardíaco", "dolor en el pecho", "dificultad para respirar", "hinchazón en las piernas"
         ));
         EXAMINATION_SYMPTOMS.put("Stress Test", Arrays.asList(
-                "chest pain during exercise", "shortness of breath with activity", "irregular heartbeat"
+                "dolor en el pecho durante el ejercicio", "dificultad para respirar con actividad", "latido cardíaco irregular"
         ));
         EXAMINATION_SYMPTOMS.put("Holter Monitoring", Arrays.asList(
-                "palpitations", "fainting spells", "dizziness", "unexplained fatigue"
+                "palpitaciones", "desmayos", "mareos", "fatiga inexplicable"
         ));
         EXAMINATION_SYMPTOMS.put("Skin Biopsy", Arrays.asList(
-                "suspicious mole", "skin lesion", "rash", "unexplained skin growth"
+                "lunar sospechoso", "lesión en la piel", "sarpullido", "crecimiento inexplicable en la piel"
         ));
         EXAMINATION_SYMPTOMS.put("Patch Testing", Arrays.asList(
-                "skin rash", "itching", "contact dermatitis", "eczema"
+                "erupción cutánea", "picazón", "dermatitis por contacto", "eccema"
         ));
         EXAMINATION_SYMPTOMS.put("Dermatoscopy", Arrays.asList(
-                "changing mole", "skin discoloration", "irregular skin growth"
+                "lunar cambiante", "decoloración de la piel", "crecimiento irregular en la piel"
         ));
         EXAMINATION_SYMPTOMS.put("Cryotherapy", Arrays.asList(
-                "warts", "skin tags", "actinic keratosis", "seborrheic keratosis"
+                "verrugas", "acrocordones", "queratosis actínica", "queratosis seborreica"
         ));
     }
 
@@ -254,7 +254,7 @@ public class Seeder {
         List<String> relevantSymptoms = EXAMINATION_SYMPTOMS.getOrDefault(name,
                 Collections.singletonList(faker.medical().symptoms()));
         String symptoms = faker.options().option(relevantSymptoms.toArray(new String[0]));
-        return String.format("A %s examination in the field of %s. Used to diagnose or monitor patients with %s.",
+        return String.format("Un examen de %s en el campo de %s. Se utiliza para diagnosticar o monitorear pacientes con %s.",
                 name, specialization, symptoms);
     }
 

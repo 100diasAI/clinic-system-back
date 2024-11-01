@@ -10,6 +10,8 @@ import com.marek_kawalski.clinic_system.user.doctor.dto.DoctorDTO;
 import com.marek_kawalski.clinic_system.user.exception.UserNotFoundException;
 import com.marek_kawalski.clinic_system.utils.CustomDateTimeFormat;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 // ... existing imports ...
 import com.marek_kawalski.clinic_system.user.doctor.dto.UpdateDoctorDTO;
 import com.marek_kawalski.clinic_system.user.doctor.dto.CreateDoctorDTO;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.List;
 @RequestMapping("/doctors")
 @AllArgsConstructor
 public class DoctorController {
+    private static final Logger logger = LoggerFactory.getLogger(DoctorController.class);
     private final DoctorService doctorService;
     private final DoctorMapper doctorMapper;
     private final AvailableAppointmentsMapper availableAppointmentsMapper;
@@ -75,4 +79,40 @@ public class DoctorController {
                 ResponseEntity.status(HttpStatus.OK).body(pagedUsers.map(doctorMapper::mapDoctorToDoctorDTO));
     }
 
+    @PostMapping("/create")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<DoctorDTO> createDoctor(@Valid @RequestBody CreateDoctorDTO createDoctorDTO) {
+        logger.info("Recibiendo solicitud POST para crear doctor: {}", createDoctorDTO);
+        try {
+            User newDoctor = doctorService.createDoctor(createDoctorDTO);
+            logger.info("Doctor creado exitosamente: {}", newDoctor.getId());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(doctorMapper.mapDoctorToDoctorDTO(newDoctor));
+        } catch (Exception e) {
+            logger.error("Error al crear doctor: ", e);
+            throw e;
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DoctorDTO> updateDoctor(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateDoctorDTO updateDoctorDTO) {
+        try {
+            User updatedDoctor = doctorService.updateDoctor(id, updateDoctorDTO);
+            return ResponseEntity.ok(doctorMapper.mapDoctorToDoctorDTO(updatedDoctor));
+        } catch (UserNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDoctor(@PathVariable String id) {
+        try {
+            doctorService.deleteDoctor(id);
+            return ResponseEntity.noContent().build();
+        } catch (UserNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
 }
