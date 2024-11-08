@@ -1,15 +1,15 @@
 package com.marek_kawalski.clinic_system.utils;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
+import java.lang.annotation.*;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-@JacksonAnnotationsInside
-@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss.SSS'Z'")
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = CustomTimeFormatValidator.class)
+@Documented
 public @interface CustomTimeFormat {
+    String message() default "Formato de hora inválido";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
 }
